@@ -81,10 +81,31 @@ Future<void> _buildShaderBundleJson({
 ///     }
 /// }
 /// ```
+///
+
+Future<String> genShaderSrc(BuildConfig config, String filePath) async {
+  Uri includeFileName = config.packageRoot.resolve(filePath);
+  File includeFile = File(includeFileName.path);
+  print("Parsing file ${includeFile.path}");
+
+  // TODO: Use include directives to generate files
+
+  return includeFile.readAsString();
+}
+
 Future<void> buildShaderBundleJson(
     {required BuildConfig buildConfig,
     required BuildOutputBuilder buildOutput,
     required String manifestFileName}) async {
+
+  Uri manifestFilePath = buildConfig.packageRoot.resolve(manifestFileName);
+  File manifestFile = File(manifestFilePath.path);
+  print("Parsing file ${manifestFile.path}");
+  manifestFile.readAsString().then((String contents){
+    print("Manifest file contents are $contents");
+    // TODO: Parse include directives and generate new files
+  });
+
   String outputFileName = Uri(path: manifestFileName).pathSegments.last;
   if (!outputFileName.endsWith('.shaderbundle.json')) {
     throw Exception(
