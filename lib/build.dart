@@ -103,7 +103,19 @@ Future<void> buildShaderBundleJson(
   print("Parsing file ${manifestFile.path}");
   manifestFile.readAsString().then((String contents){
     print("Manifest file contents are $contents");
-    // TODO: Parse include directives and generate new files
+
+    contents.split('\n').forEach((lineStr){
+      if(lineStr.contains("glsl")){
+        print("Parsing line $lineStr");
+        int startIdx = lineStr.indexOf("file:") + 6; // starts after "...
+        String shaderFilePath = "";
+        while(lineStr[startIdx] != "\n") {
+          if (lineStr[startIdx] != "\"") shaderFilePath = shaderFilePath + lineStr[startIdx];
+          startIdx++;
+        }
+        if(shaderFilePath.isNotEmpty) genShaderSrc(buildConfig, shaderFilePath);
+      } else print("Discarding line");
+    });
   });
 
   String outputFileName = Uri(path: manifestFileName).pathSegments.last;
