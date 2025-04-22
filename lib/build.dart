@@ -86,7 +86,7 @@ Future<void> _buildShaderBundleJson({
 Future<String> genShaderSrc(BuildConfig config, String filePath) async {
   Uri includeFileName = config.packageRoot.resolve(filePath);
   File includeFile = File(includeFileName.path);
-  print("Parsing file ${includeFile.path}");
+
   includeFile.readAsString().then((String contents){
     int startOffset = 0, includeOffset = 0;
 
@@ -122,21 +122,18 @@ Future<void> buildShaderBundleJson(
 
   Uri manifestFilePath = buildConfig.packageRoot.resolve(manifestFileName);
   File manifestFile = File(manifestFilePath.path);
-  print("Parsing file ${manifestFile.path}");
-  manifestFile.readAsString().then((String contents){
-    print("Manifest file contents are $contents");
 
+  manifestFile.readAsString().then((String contents){
     contents.split('\n').forEach((lineStr){
       if(lineStr.contains("glsl")){
-        print("Parsing shader line $lineStr");
-        int startIdx = lineStr.indexOf("file:") + 8; // starts after "...
+        int startIdx = lineStr.indexOf("file:") + 9; // starts after "...
         String shaderFilePath = "";
         while(lineStr[startIdx] != "\n" && startIdx < lineStr.length - 1) {
           if (lineStr[startIdx] != "\"") shaderFilePath = shaderFilePath + lineStr[startIdx];
           startIdx++;
         }
         if(shaderFilePath.isNotEmpty) genShaderSrc(buildConfig, shaderFilePath);
-      } else print("Discarding line");
+      }
     });
   });
 
