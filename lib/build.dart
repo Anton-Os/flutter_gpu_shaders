@@ -106,12 +106,14 @@ Future<void> buildShaderBundleJson(
 
     contents.split('\n').forEach((lineStr){
       if(lineStr.contains("glsl")){
-        print("Parsing line $lineStr");
+        print("Parsing shader line $lineStr");
         int startIdx = lineStr.indexOf("file:") + 6; // starts after "...
         String shaderFilePath = "";
-        while(lineStr[startIdx] != "\n") {
+        print("start index is $startIdx");
+        while(lineStr[startIdx] != "\n" && startIdx < lineStr.length) {
           if (lineStr[startIdx] != "\"") shaderFilePath = shaderFilePath + lineStr[startIdx];
           startIdx++;
+          print("index is $startIdx");
         }
         if(shaderFilePath.isNotEmpty) genShaderSrc(buildConfig, shaderFilePath);
       } else print("Discarding line");
