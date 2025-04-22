@@ -110,10 +110,9 @@ Future<void> buildShaderBundleJson(
         int startIdx = lineStr.indexOf("file:") + 6; // starts after "...
         String shaderFilePath = "";
         print("start index is $startIdx");
-        while(lineStr[startIdx] != "\n" && startIdx < lineStr.length) {
+        while(lineStr[startIdx] != "\n" && startIdx < lineStr.length - 1) {
           if (lineStr[startIdx] != "\"") shaderFilePath = shaderFilePath + lineStr[startIdx];
           startIdx++;
-          print("index is $startIdx");
         }
         if(shaderFilePath.isNotEmpty) genShaderSrc(buildConfig, shaderFilePath);
       } else print("Discarding line");
