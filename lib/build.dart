@@ -87,8 +87,30 @@ Future<String> genShaderSrc(BuildConfig config, String filePath) async {
   Uri includeFileName = config.packageRoot.resolve(filePath);
   File includeFile = File(includeFileName.path);
   print("Parsing file ${includeFile.path}");
+  includeFile.readAsString().then((String contents){
+    int startOffset = 0, includeOffset = 0;
 
-  // TODO: Use include directives to generate files
+    while(contents.contains("#include")){
+      startOffset = contents.indexOf("#include");
+      includeOffset = startOffset + 10;
+
+      String includeStr = "";
+      while(contents[includeOffset] != "\n"){
+        if(contents[includeOffset] != "\\" && contents[includeOffset] != ">" && contents[includeOffset] != ";")
+          includeStr = includeStr + contents[includeOffset];
+        includeOffset++;
+      }
+      print("Include Str is $includeStr");
+
+      String includeSrc = "";
+
+      contents = contents.replaceAll("#include", ""); // TODO: Replace with include file
+    }
+
+    print("Shader contents are $contents");
+  });
+
+  // TODO: Generate new files in output directory
 
   return includeFile.readAsString();
 }
@@ -107,9 +129,8 @@ Future<void> buildShaderBundleJson(
     contents.split('\n').forEach((lineStr){
       if(lineStr.contains("glsl")){
         print("Parsing shader line $lineStr");
-        int startIdx = lineStr.indexOf("file:") + 6; // starts after "...
+        int startIdx = lineStr.indexOf("file:") + 8; // starts after "...
         String shaderFilePath = "";
-        print("start index is $startIdx");
         while(lineStr[startIdx] != "\n" && startIdx < lineStr.length - 1) {
           if (lineStr[startIdx] != "\"") shaderFilePath = shaderFilePath + lineStr[startIdx];
           startIdx++;
