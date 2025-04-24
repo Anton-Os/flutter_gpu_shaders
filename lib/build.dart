@@ -122,6 +122,7 @@ Future<void> buildShaderBundleJson(
 
   Uri manifestFilePath = buildConfig.packageRoot.resolve(manifestFileName);
   File manifestFile = File(manifestFilePath.path);
+  print("Manifest file path is ${manifestFilePath.path}");
 
   manifestFile.readAsString().then((String contents){
     contents.split('\n').forEach((lineStr){
@@ -133,7 +134,8 @@ Future<void> buildShaderBundleJson(
           startIdx++;
         }
         if(shaderFilePath.isNotEmpty) {
-          if(shaderFilePath.contains("%20")) shaderFilePath.replaceAll("%20", '');
+          if(shaderFilePath.contains("%20")) shaderFilePath = shaderFilePath.replaceAll("%20", '');
+          print("Shader file path is $shaderFilePath");
           genShaderSrc(buildConfig, shaderFilePath);
         }
       }
