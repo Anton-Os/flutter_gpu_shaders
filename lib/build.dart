@@ -135,6 +135,7 @@ Future<void> buildShaderBundleJson(
         }
         if(shaderFilePath.isNotEmpty) {
           if(shaderFilePath.contains("%20")) shaderFilePath = shaderFilePath.replaceAll("%20", '');
+          shaderFilePath = manifestFilePath.path.substring(0, manifestFile.path.indexOf("lib/")) + shaderFilePath;
           print("Shader file path is $shaderFilePath");
           genShaderSrc(buildConfig, shaderFilePath);
         }
