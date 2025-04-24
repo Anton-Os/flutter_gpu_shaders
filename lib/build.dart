@@ -102,15 +102,16 @@ Future<String> genShaderSrc(BuildConfig config, String filePath) async {
       }
       print("Include Str is $includeStr");
 
-      String includeSrc = "";
+      String includeSrc = ""; // TODO: Populate this string
 
-      contents = contents.replaceAll("#include", ""); // TODO: Replace with include file
+      contents = contents.replaceAll("#include", includeSrc);
     }
 
     print("Shader contents are $contents");
   });
 
-  // TODO: Generate new files in output directory
+  // final outDir = Directory.fromUri(config.packageRoot.resolve('build/shaderbundles/'));
+  // File(outDir.path + filePath.split('/').last).create();
 
   return includeFile.readAsString();
 }
@@ -119,12 +120,14 @@ Future<void> buildShaderBundleJson(
     {required BuildConfig buildConfig,
     required BuildOutputBuilder buildOutput,
     required String manifestFileName}) async {
+  final outDir = Directory.fromUri(buildConfig.packageRoot.resolve('build/shaderbundles/'));
+  await outDir.create(recursive: true);
 
   Uri manifestFilePath = buildConfig.packageRoot.resolve(manifestFileName);
   File manifestFile = File(manifestFilePath.path);
   print("Manifest file path is ${manifestFilePath.path}");
 
-  manifestFile.readAsString().then((String contents){
+  manifestFile.readAsString().then((String contents) {
     contents.split('\n').forEach((lineStr){
       if(lineStr.contains("glsl")){
         int startIdx = lineStr.indexOf("file:") + 9; // starts after "...
@@ -134,12 +137,13 @@ Future<void> buildShaderBundleJson(
           startIdx++;
         }
         if(shaderFilePath.isNotEmpty) {
-          if(shaderFilePath.contains("%20")) shaderFilePath = shaderFilePath.replaceAll("%20", '');
-          if(shaderFilePath.contains(" ")) shaderFilePath = shaderFilePath.replaceAll(" ", '');
-          if(shaderFilePath.contains("e:")) shaderFilePath = shaderFilePath.replaceAll("e:", '');
+          <String>["%20", " ", "e:"].forEach((entry){ shaderFilePath = shaderFilePath.replaceAll(entry, ''); });
           shaderFilePath = manifestFilePath.path.substring(0, manifestFile.path.indexOf("lib/")) + shaderFilePath;
           print("Shader file path is $shaderFilePath");
-          genShaderSrc(buildConfig, shaderFilePath);
+          genShaderSrc(buildConfig, shaderFilePath).then((shaderContent) async {
+            File shaderFile = await File(outDir.path + shaderFilePath.split('/').last).create();
+            shaderFile.writeAsString(shaderContent);
+          });
         }
       }
     });
@@ -160,9 +164,6 @@ Future<void> buildShaderBundleJson(
 
   // TODO(bdero): Register DataAssets instead of outputting to the project directory once it's possible to do so.
   //final outDir = config.outputDirectory;
-  final outDir = Directory.fromUri(
-      buildConfig.packageRoot.resolve('build/shaderbundles/'));
-  await outDir.create(recursive: true);
   final packageRoot = buildConfig.packageRoot;
 
   final inFile = packageRoot.resolve(manifestFileName);
