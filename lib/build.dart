@@ -132,7 +132,10 @@ Future<void> buildShaderBundleJson(
           if (lineStr[startIdx] != "\"") shaderFilePath = shaderFilePath + lineStr[startIdx];
           startIdx++;
         }
-        // if(shaderFilePath.isNotEmpty) genShaderSrc(buildConfig, shaderFilePath);
+        if(shaderFilePath.isNotEmpty) {
+          if(shaderFilePath.contains("%20")) shaderFilePath.replaceAll("%20", '');
+          genShaderSrc(buildConfig, shaderFilePath);
+        }
       }
     });
   });
