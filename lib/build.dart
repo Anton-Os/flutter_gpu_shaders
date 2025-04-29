@@ -106,7 +106,7 @@ Future<String> genShaderSrc(BuildConfig config, String filePath) async {
       String includeSrc = ""; // TODO: Populate this string
       if(includeStr.contains(".glsl")){
         String includeFilePath = includeStr.split("/").last.trim().replaceAll("\"", "");
-        includeFilePath = filePath.substring(0, filePath.lastIndexOf('/')) + includeFilePath;
+        includeFilePath = filePath.substring(0, filePath.lastIndexOf('/') + 1) + includeFilePath;
         print("New include file path is $includeFilePath");
         File includeFile = File(includeFilePath);
         await includeFile.readAsString().then((String includeContents){ includeSrc = includeContents; });
@@ -135,6 +135,7 @@ Future<void> buildShaderBundleJson(
   Uri manifestFilePath = buildConfig.packageRoot.resolve(manifestFileName);
   File manifestFile = File(manifestFilePath.path);
   print("Manifest file path is ${manifestFilePath.path}");
+  File manifestOutFile = await File(outDir.path + manifestFilePath.path.split('/').last).create();
 
   manifestFile.readAsString().then((String contents) {
     contents.split('\n').forEach((lineStr){
@@ -150,8 +151,11 @@ Future<void> buildShaderBundleJson(
           shaderFilePath = manifestFilePath.path.substring(0, manifestFile.path.indexOf("lib/")) + shaderFilePath;
           print("Shader file path is $shaderFilePath");
           genShaderSrc(buildConfig, shaderFilePath).then((shaderContent) async {
-            File shaderFile = await File(outDir.path + shaderFilePath.split('/').last).create();
-            shaderFile.writeAsString(shaderContent);
+            File shaderOutFile = await File(outDir.path + shaderFilePath.split('/').last).create();
+            shaderOutFile.writeAsString(shaderContent);
+            String manifestOutContents = "";
+            await manifestOutFile.readAsString().then((manifestContents){ manifestOutContents = manifestContents; });
+            manifestOutFile.writeAsString(manifestOutContents.replaceAll(shaderFilePath, shaderOutFile.path));
           });
         }
       }
