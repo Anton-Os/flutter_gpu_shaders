@@ -138,6 +138,8 @@ Future<void> buildShaderBundleJson(
   File manifestOutFile = await File(outDir.path + manifestFilePath.path.split('/').last).create();
 
   manifestFile.readAsString().then((String contents) {
+    String manifestOutContents = contents;
+    
     contents.split('\n').forEach((lineStr){
       if(lineStr.contains("glsl")){
         int startIdx = lineStr.indexOf("file:") + 9; // starts after "...
@@ -153,7 +155,6 @@ Future<void> buildShaderBundleJson(
           genShaderSrc(buildConfig, shaderFilePath).then((shaderContent) async {
             File shaderOutFile = await File(outDir.path + shaderFilePath.split('/').last).create();
             shaderOutFile.writeAsString(shaderContent);
-            String manifestOutContents = "";
             await manifestOutFile.readAsString().then((manifestContents){ manifestOutContents = manifestContents; });
             manifestOutFile.writeAsString(manifestOutContents.replaceAll(shaderFilePath, shaderOutFile.path));
           });
