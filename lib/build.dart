@@ -84,10 +84,11 @@ Future<void> _buildShaderBundleJson({
 ///
 
 Future<String> genShaderSrc(BuildConfig config, String filePath) async {
-  Uri includeFileName = config.packageRoot.resolve(filePath);
-  File includeFile = File(includeFileName.path);
+  Uri shaderFilePath = config.packageRoot.resolve(filePath);
+  File shaderFile = File(shaderFilePath.path);
 
-  includeFile.readAsString().then((String contents){
+  String shaderContents = "";
+  await shaderFile.readAsString().then((String contents) async {
     int startOffset = 0, includeOffset = 0;
 
     while(contents.contains("#include")){
@@ -103,17 +104,25 @@ Future<String> genShaderSrc(BuildConfig config, String filePath) async {
       print("Include Str is $includeStr");
 
       String includeSrc = ""; // TODO: Populate this string
+      if(includeStr.contains(".glsl")){
+        String includeFilePath = includeStr.split("/").last.trim().replaceAll("\"", "");
+        includeFilePath = filePath.substring(0, filePath.lastIndexOf('/')) + includeFilePath;
+        print("New include file path is $includeFilePath");
+        File includeFile = File(includeFilePath);
+        await includeFile.readAsString().then((String includeContents){ includeSrc = includeContents; });
+      }
 
       contents = contents.replaceAll("#include", includeSrc);
     }
 
-    print("Shader contents are $contents");
+    shaderContents = contents;
+    print("Shader contents are $shaderContents");
   });
 
   // final outDir = Directory.fromUri(config.packageRoot.resolve('build/shaderbundles/'));
   // File(outDir.path + filePath.split('/').last).create();
 
-  return includeFile.readAsString();
+  return shaderContents;
 }
 
 Future<void> buildShaderBundleJson(
