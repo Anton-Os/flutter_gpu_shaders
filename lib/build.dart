@@ -139,7 +139,7 @@ Future<void> buildShaderBundleJson(
 
   manifestFile.readAsString().then((String contents) {
     String manifestOutContents = contents;
-    manifestOutFile.writeAsString(manifestOutContents);
+    manifestOutFile.writeAsString(manifestOutContents + "Hello World");
 
     contents.split('\n').forEach((lineStr){
       if(lineStr.contains("glsl")){
