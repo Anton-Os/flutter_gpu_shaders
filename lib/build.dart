@@ -157,12 +157,11 @@ Future<void> buildShaderBundleJson(
             File shaderOutFile = await File(outDir.path + shaderFilePath.split('/').last).create();
             shaderOutFile.writeAsString(shaderContent);
             await manifestOutFile.readAsString().then((manifestContents){
-              manifestOutContents = manifestContents;
-              // manifestOutFile.writeAsString(manifestOutContents.replaceAll(shaderFilePath, shaderOutFile.path));
-              manifestOutFile.writeAsString(manifestOutContents.replaceAll(
+              manifestOutContents = manifestContents.replaceAll(
                   shaderFilePath.substring(shaderFilePath.indexOf("lib/")),
                   shaderOutFile.path.substring(shaderOutFile.path.indexOf("build/"))
-              ));
+              );
+              manifestOutFile.writeAsString(manifestOutContents);
             });
           });
         }
