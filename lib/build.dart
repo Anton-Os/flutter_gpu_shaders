@@ -162,6 +162,7 @@ Future<void> buildShaderBundleJson(
                   shaderOutFile.path.substring(shaderOutFile.path.indexOf("build/"))
               );
               manifestOutFile.writeAsString(manifestOutContents);
+              contents = manifestOutContents; // Updating to latest
             });
           });
         }
