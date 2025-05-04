@@ -152,13 +152,17 @@ Future<void> buildShaderBundleJson(
         if(shaderFilePath.isNotEmpty) {
           <String>["%20", " ", "e:"].forEach((entry){ shaderFilePath = shaderFilePath.replaceAll(entry, ''); });
           shaderFilePath = manifestFilePath.path.substring(0, manifestFile.path.indexOf("lib/")) + shaderFilePath;
-          print("Shader file path is $shaderFilePath");
+          print("Shader file path is $shaderFilePath, subpath is ${shaderFilePath.substring(shaderFilePath.indexOf("lib/"))}");
           genShaderSrc(buildConfig, shaderFilePath).then((shaderContent) async {
             File shaderOutFile = await File(outDir.path + shaderFilePath.split('/').last).create();
             shaderOutFile.writeAsString(shaderContent);
             await manifestOutFile.readAsString().then((manifestContents){
               manifestOutContents = manifestContents;
-              manifestOutFile.writeAsString(manifestOutContents.replaceAll(shaderFilePath, "Shader Path!"));
+              // manifestOutFile.writeAsString(manifestOutContents.replaceAll(shaderFilePath, shaderOutFile.path));
+              manifestOutFile.writeAsString(manifestOutContents.replaceAll(
+                  shaderFilePath.substring(shaderFilePath.indexOf("lib/")),
+                  shaderOutFile.path.substring(shaderOutFile.path.indexOf("build/"))
+              ));
             });
           });
         }
