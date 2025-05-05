@@ -137,7 +137,7 @@ Future<void> buildShaderBundleJson(
   print("Manifest file path is ${manifestFilePath.path}");
   File manifestOutFile = await File(outDir.path + manifestFilePath.path.split('/').last).create();
 
-  manifestFile.readAsString().then((String contents) {
+  await manifestFile.readAsString().then((String contents) {
     String manifestOutContents = contents;
     manifestOutFile.writeAsString(manifestOutContents);
 
