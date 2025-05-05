@@ -158,8 +158,8 @@ Future<void> buildShaderBundleJson(
             shaderOutFile.writeAsString(shaderContent);
             await manifestOutFile.readAsString().then((manifestContents){
               manifestOutContents = manifestContents.replaceAll(
-                  shaderFilePath.substring(shaderFilePath.indexOf("lib/")),
-                  shaderOutFile.path.substring(shaderOutFile.path.indexOf("build/"))
+                  "lib/shaders",// shaderFilePath.substring(shaderFilePath.indexOf("lib/")),
+                  "build/shaderbundles" // shaderOutFile.path.substring(shaderOutFile.path.indexOf("build/"))
               );
               manifestOutFile.writeAsString(manifestOutContents);
               contents = manifestOutContents; // Updating to latest
