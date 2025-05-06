@@ -112,7 +112,7 @@ Future<String> genShaderSrc(BuildConfig config, String filePath) async {
         await includeFile.readAsString().then((String includeContents){ includeSrc = includeContents; });
       }
 
-      contents = contents.replaceAll("#include", includeSrc);
+      contents = contents.replaceAll(includeStr, includeSrc);
     }
 
     shaderContents = contents;
