@@ -134,8 +134,9 @@ Future<void> buildShaderBundleJson(
 
   Uri manifestFilePath = buildConfig.packageRoot.resolve(manifestFileName);
   File manifestFile = File(manifestFilePath.path);
-  print("Manifest file path is ${manifestFilePath.path}");
   File manifestOutFile = await File(outDir.path + manifestFilePath.path.split('/').last).create();
+  Uri manifestOutPath = buildConfig.packageRoot.resolve(manifestOutFile.path);
+  print("Manifest file path is ${manifestFilePath.path}, out path is ${manifestOutPath.path}");
 
   await manifestFile.readAsString().then((String contents) {
     String manifestOutContents = contents;
@@ -187,7 +188,7 @@ Future<void> buildShaderBundleJson(
   //final outDir = config.outputDirectory;
   final packageRoot = buildConfig.packageRoot;
 
-  final inFile = packageRoot.resolve(manifestFileName);
+  final inFile = packageRoot.resolve(manifestOutPath.path);
   final outFile = outDir.uri.resolve(outputFileName);
 
   await _buildShaderBundleJson(
