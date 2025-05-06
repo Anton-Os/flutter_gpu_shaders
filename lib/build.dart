@@ -170,7 +170,7 @@ Future<void> buildShaderBundleJson(
     });
   });
 
-  String outputFileName = Uri(path: manifestOutFile.path).pathSegments.last;
+  String outputFileName = Uri(path: manifestFileName).pathSegments.last;
   if (!outputFileName.endsWith('.shaderbundle.json')) {
     throw Exception(
         'Shader bundle manifest file names must end with ".shaderbundle.json".');
@@ -187,7 +187,7 @@ Future<void> buildShaderBundleJson(
   //final outDir = config.outputDirectory;
   final packageRoot = buildConfig.packageRoot;
 
-  final inFile = packageRoot.resolve(manifestOutFile.path);
+  final inFile = packageRoot.resolve(manifestFileName);
   final outFile = outDir.uri.resolve(outputFileName);
 
   await _buildShaderBundleJson(
