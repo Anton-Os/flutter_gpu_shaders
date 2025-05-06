@@ -112,15 +112,13 @@ Future<String> genShaderSrc(BuildConfig config, String filePath) async {
         await includeFile.readAsString().then((String includeContents){ includeSrc = includeContents; });
       }
 
-      contents = contents.replaceAll(includeStr, includeSrc);
+      if(includeStr.isNotEmpty) contents = contents.replaceAll(includeStr, includeSrc);
+      else contents = contents.replaceAll("#include", "//");
+      print("New shader contents is $contents");
     }
 
     shaderContents = contents;
-    print("Shader contents are $shaderContents");
   });
-
-  // final outDir = Directory.fromUri(config.packageRoot.resolve('build/shaderbundles/'));
-  // File(outDir.path + filePath.split('/').last).create();
 
   return shaderContents;
 }
