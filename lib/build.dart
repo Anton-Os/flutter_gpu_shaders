@@ -139,7 +139,7 @@ Future<void> buildShaderBundleJson(
   print("Manifest file path is ${manifestFilePath.path}, out path is ${manifestOutPath.path}");
 
   await manifestFile.readAsString().then((String contents) {
-    String manifestOutContents = contents;
+    String manifestOutContents = contents.replaceAll("lib/shaders", "build/shaderbundles");
     manifestOutFile.writeAsString(manifestOutContents);
 
     contents.split('\n').forEach((lineStr){
@@ -158,14 +158,6 @@ Future<void> buildShaderBundleJson(
             print("Shader contents are $shaderContent");
             File shaderOutFile = await File(outDir.path + shaderFilePath.split('/').last).create();
             shaderOutFile.writeAsString(shaderContent);
-            await manifestOutFile.readAsString().then((manifestContents){
-              manifestOutContents = manifestContents.replaceAll(
-                  "lib/shaders",// shaderFilePath.substring(shaderFilePath.indexOf("lib/")),
-                  "build/shaderbundles" // shaderOutFile.path.substring(shaderOutFile.path.indexOf("build/"))
-              );
-              manifestOutFile.writeAsString(manifestOutContents);
-              contents = manifestOutContents; // Updating to latest
-            });
           });
         }
       }
