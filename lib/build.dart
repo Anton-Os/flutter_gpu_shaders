@@ -155,6 +155,7 @@ Future<void> buildShaderBundleJson(
           shaderFilePath = manifestFilePath.path.substring(0, manifestFile.path.indexOf("lib/")) + shaderFilePath;
           print("Shader file path is $shaderFilePath, subpath is ${shaderFilePath.substring(shaderFilePath.indexOf("lib/"))}");
           genShaderSrc(buildConfig, shaderFilePath).then((shaderContent) async {
+            print("Shader contents are $shaderContent");
             File shaderOutFile = await File(outDir.path + shaderFilePath.split('/').last).create();
             shaderOutFile.writeAsString(shaderContent);
             await manifestOutFile.readAsString().then((manifestContents){
