@@ -131,7 +131,7 @@ Future<void> buildShaderBundleJson(
   await outDir.create(recursive: true);
 
   Uri manifestFilePath = buildConfig.packageRoot.resolve(manifestFileName);
-  File manifestFile = File(manifestFilePath.path);
+  File manifestFile = File((!Platform.isWindows)? manifestFilePath.path : manifestFilePath.path.substring(1));
   File manifestOutFile = await File(outDir.path + manifestFilePath.path.split('/').last).create();
   Uri manifestOutPath = buildConfig.packageRoot.resolve(manifestOutFile.path);
   print("Manifest file path is ${manifestFilePath.path}, out path is ${manifestOutPath.path}");
