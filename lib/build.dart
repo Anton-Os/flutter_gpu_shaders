@@ -123,6 +123,27 @@ Future<String> genShaderSrc(BuildConfig config, String filePath) async {
   return shaderContents;
 }
 
+Future<void> parseLine(String lineStr, Uri manifestFilePath, Directory outDir, BuildConfig buildConfig, File manifestFile) async {
+  if(lineStr.contains("glsl")){
+    int startIdx = lineStr.indexOf("file:") + 9; // starts after "...
+    String shaderFilePath = (!Platform.isWindows)? "" : "/";
+    while(lineStr[startIdx] != "\n" && startIdx < lineStr.length - 1) {
+      if (lineStr[startIdx] != "\"") shaderFilePath = shaderFilePath + lineStr[startIdx];
+      startIdx++;
+    }
+    if(shaderFilePath.isNotEmpty) {
+      <String>["%20", " ", "e:"].forEach((entry){ shaderFilePath = shaderFilePath.replaceAll(entry, ''); });
+      shaderFilePath = manifestFilePath.path.substring((!Platform.isWindows)? 0 : 1, manifestFile.path.indexOf("lib/")) + shaderFilePath;
+      print("Shader file path is $shaderFilePath, subpath is ${shaderFilePath.substring(shaderFilePath.indexOf("lib/"))}");
+      await genShaderSrc(buildConfig, shaderFilePath).then((shaderContent) async {
+        File shaderOutFile = await File(outDir.path + shaderFilePath.split('/').last).create();
+        print("Shader contents are $shaderContent");
+        shaderOutFile.writeAsString(shaderContent);
+      });
+    }
+  }
+}
+
 Future<void> buildShaderBundleJson(
     {required BuildConfig buildConfig,
     required BuildOutputBuilder buildOutput,
@@ -141,49 +162,33 @@ Future<void> buildShaderBundleJson(
     manifestOutFile.writeAsString(manifestOutContents);
 
     contents.split('\n').forEach((lineStr) async {
-      if(lineStr.contains("glsl")){
-        int startIdx = lineStr.indexOf("file:") + 9; // starts after "...
-        String shaderFilePath = (!Platform.isWindows)? "" : "/";
-        while(lineStr[startIdx] != "\n" && startIdx < lineStr.length - 1) {
-          if (lineStr[startIdx] != "\"") shaderFilePath = shaderFilePath + lineStr[startIdx];
-          startIdx++;
-        }
-        if(shaderFilePath.isNotEmpty) {
-          <String>["%20", " ", "e:"].forEach((entry){ shaderFilePath = shaderFilePath.replaceAll(entry, ''); });
-          shaderFilePath = manifestFilePath.path.substring((!Platform.isWindows)? 0 : 1, manifestFile.path.indexOf("lib/")) + shaderFilePath;
-          print("Shader file path is $shaderFilePath, subpath is ${shaderFilePath.substring(shaderFilePath.indexOf("lib/"))}");
-          await genShaderSrc(buildConfig, shaderFilePath).then((shaderContent) async {
-            File shaderOutFile = await File(outDir.path + shaderFilePath.split('/').last).create();
-            print("Shader contents are $shaderContent");
-            shaderOutFile.writeAsString(shaderContent);
-          });
-        }
-      }
+      await parseLine(lineStr, manifestFilePath, outDir, buildConfig, manifestFile);
     });
-  });
 
-  String outputFileName = Uri(path: manifestFileName).pathSegments.last;
-  if (!outputFileName.endsWith('.shaderbundle.json')) {
-    throw Exception(
-        'Shader bundle manifest file names must end with ".shaderbundle.json".');
-  }
-  if (outputFileName.length <= '.shaderbundle.json'.length) {
-    throw Exception(
-        'Invalid shader bundle manifest file name: $outputFileName');
-  }
-  if (outputFileName.endsWith('.json')) {
-    outputFileName = outputFileName.substring(0, outputFileName.length - 5);
-  }
+    String outputFileName = Uri(path: manifestFileName).pathSegments.last;
+    if (!outputFileName.endsWith('.shaderbundle.json')) {
+      throw Exception(
+          'Shader bundle manifest file names must end with ".shaderbundle.json".');
+    }
+    if (outputFileName.length <= '.shaderbundle.json'.length) {
+      throw Exception(
+          'Invalid shader bundle manifest file name: $outputFileName');
+    }
+    if (outputFileName.endsWith('.json')) {
+      outputFileName = outputFileName.substring(0, outputFileName.length - 5);
+    }
 
-  // TODO(bdero): Register DataAssets instead of outputting to the project directory once it's possible to do so.
-  //final outDir = config.outputDirectory;
-  final packageRoot = buildConfig.packageRoot;
+    // TODO(bdero): Register DataAssets instead of outputting to the project directory once it's possible to do so.
+    //final outDir = config.outputDirectory;
+    final packageRoot = buildConfig.packageRoot;
 
-  final inFile = packageRoot.resolve(manifestOutPath.path);
-  final outFile = outDir.uri.resolve(outputFileName);
+    final inFile = packageRoot.resolve(manifestOutPath.path);
+    final outFile = outDir.uri.resolve(outputFileName);
 
-  await _buildShaderBundleJson(
+    _buildShaderBundleJson(
       packageRoot: packageRoot,
       inputManifestFilePath: inFile,
-      outputBundleFilePath: outFile);
+      outputBundleFilePath: outFile
+    );
+  });
 }
