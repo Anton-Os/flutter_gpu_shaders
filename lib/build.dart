@@ -83,41 +83,33 @@ Future<void> _buildShaderBundleJson({
 /// ```
 ///
 
-Future<String> genShaderSrc(BuildConfig config, String filePath) async {
+Future<String> gencontents(BuildConfig config, String filePath) async {
   Uri shaderFilePath = config.packageRoot.resolve(filePath);
   File shaderFile = File(shaderFilePath.path);
 
   String shaderContents = "";
   await shaderFile.readAsString().then((String contents) async {
     int startOffset = 0, includeOffset = 0;
-
     while(contents.contains("#include")){
-      startOffset = contents.indexOf("#include");
-      includeOffset = startOffset + 10;
-
-      String includeStr = "";
-      while(contents[includeOffset] != "\n"){
-        if(contents[includeOffset] != "\\" && contents[includeOffset] != ">" && contents[includeOffset] != ";")
-          includeStr = includeStr + contents[includeOffset];
+      startOffset = contents.indexOf("#include", startOffset);
+      includeOffset = startOffset + 10; // location of include after the space
+  
+      String includeStr = "", includeSrc = "";
+      while(contents[includeOffset] != '\n' && contents[includeOffset] != '\0'){
+        if(contents[includeOffset] != '\"' && contents[includeOffset] != '>' && contents[includeOffset] != ';') includeStr += contents[includeOffset];
         includeOffset++;
       }
-      print("Include Str is $includeStr");
-
-      String includeSrc = ""; // TODO: Populate this string
-      if(includeStr.contains(".glsl")){
-        String includeFilePath = includeStr.split("/").last.trim().replaceAll("\"", "");
-        includeFilePath = filePath.substring(0, filePath.lastIndexOf('/') + 1) + includeFilePath;
-        print("New include file path is $includeFilePath");
-        File includeFile = File(includeFilePath);
-        await includeFile.readAsString().then((String includeContents){ includeSrc = includeContents; });
+  
+      if(includeStr.substring(includeStr.length - 4) == "glsl"){ // read from file
+        includeStr = includeStr.split("/").last.trim().replaceAll("\"", "");
+        includeStr = filePath.substring(0, filePath.lastIndexOf('/') + 1) + includeStr;
+        File includeFile = File(includeSrc);
+        includeSrc = includeFile.readAsStringSync();
       }
-
-      if(includeStr.isNotEmpty) contents = contents.replaceAll(includeStr, includeSrc);
-      else contents = contents.replaceAll("#include", "//");
-      print("New shader contents is $contents");
+  
+      contents.replaceRange(startOffset, includeOffset - startOffset, includeSrc);
     }
-
-    shaderContents = contents;
+    return contents;
   });
 
   return shaderContents;
@@ -135,7 +127,7 @@ Future<void> parseLine(String lineStr, Uri manifestFilePath, Directory outDir, B
       <String>["%20", " ", "e:"].forEach((entry){ shaderFilePath = shaderFilePath.replaceAll(entry, ''); });
       shaderFilePath = manifestFilePath.path.substring((!Platform.isWindows)? 0 : 1, manifestFile.path.indexOf("lib/")) + shaderFilePath;
       print("Shader file path is $shaderFilePath, subpath is ${shaderFilePath.substring(shaderFilePath.indexOf("lib/"))}");
-      await genShaderSrc(buildConfig, shaderFilePath).then((shaderContent) async {
+      await gencontents(buildConfig, shaderFilePath).then((shaderContent) async {
         File shaderOutFile = await File(outDir.path + shaderFilePath.split('/').last).create();
         print("Shader contents are $shaderContent");
         shaderOutFile.writeAsString(shaderContent);
