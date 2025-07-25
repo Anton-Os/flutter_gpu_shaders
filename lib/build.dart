@@ -153,9 +153,9 @@ Future<void> buildShaderBundleJson(
     String manifestOutContents = contents.replaceAll("lib/shaders", "build/shaderbundles");
     manifestOutFile.writeAsString(manifestOutContents);
 
-    /* contents.split('\n').forEach((lineStr) async {
+    contents.split('\n').forEach((lineStr) async {
       await parseLine(lineStr, manifestFilePath, outDir, buildConfig, manifestFile);
-    }); */
+    });
 
     String outputFileName = Uri(path: manifestFileName).pathSegments.last;
     if (!outputFileName.endsWith('.shaderbundle.json')) {
